@@ -1,13 +1,14 @@
+import os
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_session import Session
 
 app = Flask(__name__)
 
-# Essential configurations for sessions
-app.config["SECRET_KEY"] = "zhrzQXplsrZRaaQpFfPPUv25xlRZq24V"  # Required for sessions
+# Fetch SECRET_KEY from environment variable, with a fallback for local testing
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "default-local-secret-key-12345")
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "null"  # In-memory sessions to avoid filesystem issues
-app.config["SESSION_COOKIE_NAME"] = "recruiter_session"  # Explicit cookie name
+app.config["SESSION_COOKIE_NAME"] = "recruiter_session"
 
 # Initialize Flask-Session
 Session(app)
@@ -154,7 +155,6 @@ def index():
 
             results.sort(key=lambda x: x["risk_score"])
             top_strengths = [r for r in results if r["risk_score"] <= 1][:3]
-            top_vulnerabilities = [r for r in results if r["risk_score"] > 2][:3]
 
             total_risk = sum(r["risk_score"] for r in results)
             max_risk = len(skills_data) * 4
@@ -166,7 +166,6 @@ def index():
                 "results.html",
                 results=results,
                 strengths=top_strengths,
-                vulnerabilities=top_vulnerabilities,
                 replaceability_percent=replaceability_percent,
                 focus_skills=focus_skills
             )
