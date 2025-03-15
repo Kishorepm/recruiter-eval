@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .container { max-width: 800px; }
+        h1, h3 { color: #343a40; }
+
+        /* Ring Chart Styling */
+        .ring-chart-container { text-align: center; margin: 20px 0; position: relative; }
+        .ring-chart { width: 150px; height: 150px; position: relative; display: inline-block; }
+        .ring-chart svg { width: 100%; height: 100%; }
+        .ring-chart circle { fill: none; stroke-width: 15; }
+        .ring-chart .bg-circle { stroke: #e9ecef; }
+        .ring-chart .progress-circle {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.5s;
+            stroke: #28a745; /* Default to green */
+        }
+        /* Dynamic color based on resilience score */
+        .ring-chart.resilience-high .progress-circle { stroke: #28a745; } /* 70-100% */
+        .ring-chart.resilience-medium .progress-circle { stroke: #ffc107; } /* 40-69% */
+        .ring-chart.resilience-low .progress-circle { stroke: #dc3545; } /* 0-39% */
+        .ring-chart .percent-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .row { margin-bottom: 20px; }
+        .card { border: none; }
+        .strength { background-color: #d4edda; }
+        .focus { background-color: #fff3cd; padding: 10px; border-radius: 5px; }
+        .table-container { max-height: 300px; overflow-y: auto; }
+        .personal-feedback { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Your Skill Evaluation Results</h1>
+
+        <!-- AI Resilience Score with Ring Chart -->
+        {% set resilience_score = 100 - replaceability_percent %}
+        {% set resilience_class = "resilience-high" if resilience_score >= 70 else "resilience-medium" if resilience_score >= 40 else "resilience-low" %}
+        <div class="ring-chart-container">
+            <div class="ring-chart {{ resilience_class }}">
+                <svg viewBox="0 0 100 100">
+                    <circle class="bg-circle" cx="50" cy="50" r="40" />
+                    <circle class="progress-circle" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="{{ 251.2 - (resilience_score / 100 * 251.2) }}" />
+                </svg>
+                <div class="percent-text">{{ resilience_score }}%</div>
+            </div>
+            <h3 class="mt-2">AI Resilience Score</h3>
+            <p>This score reflects how well your skills resist AI automation. A higher score means you're better positioned against AI trends. Areas to improve can boost your resilience!</p>
+        </div>
+
+        <!-- Personalized Feedback -->
+        <div class="personal-feedback">
+            {% if resilience_score >= 70 %}
+                <p class="text-success">Great job! Your skills are highly resilient to AI. Keep refining your strengths to stay ahead.</p>
+            {% elif resilience_score >= 40 %}
+                <p class="text-warning">Solid foundation! Some skills could use a boost to enhance your resilience—focus on the areas below.</p>
+            {% else %}
+                <p class="text-danger">Room to grow! Several skills are at risk from AI. Prioritize the skills below to improve your resilience.</p>
+            {% endif %}
+        </div>
+
+        <!-- Top Strengths and Skills to Focus On -->
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Top Strengths</h3>
+                {% for strength in strengths %}
+                <div class="card strength mb-2">
+                    <div class="card-body">
+                        {{ strength.title }} (Risk: {{ strength.risk_score }}, Proficiency: {{ strength.proficiency }})
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <h3>Skills to Focus On</h3>
+                {% if focus_skills %}
+                <div class="focus">
+                    <ul class="list-unstyled">
+                        {% for skill in focus_skills %}
+                        <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="text-success">Awesome! No high-risk skills to focus on.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- All Skills Table -->
+        <h3>All Skills</h3>
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Skill</th>
+                        <th>Proficiency</th>
+                        <th>Risk Score</th>
+                        <th>AI Exposure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.title }}</td>
+                        <td>{{ result.proficiency }}</td>
+                        <td>{{ result.risk_score }}</td>
+                        <td>{{ result.ai_exposure }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="/" class="btn btn-primary w-100 mt-3">Back to Evaluation</a>
+    </div>
+</body>
+</html>
