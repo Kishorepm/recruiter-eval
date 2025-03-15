@@ -1,17 +1,10 @@
 import os
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_session import Session
 
 app = Flask(__name__)
 
 # Fetch SECRET_KEY from environment variable, with a fallback for local testing
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "default-local-secret-key-12345")
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "null"  # In-memory sessions to avoid filesystem issues
-app.config["SESSION_COOKIE_NAME"] = "recruiter_session"
-
-# Initialize Flask-Session
-Session(app)
 
 # Debug logging to verify session setup
 @app.before_request
